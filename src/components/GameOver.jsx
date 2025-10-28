@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { base } from "viem/chains";
 import { useAccount, useConnect, useWriteContract } from "wagmi";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import { MiniAppSDK } from "@farcaster/miniapp-sdk";
+import { injected } from "wagmi/connectors";
+import sdk from "@farcaster/miniapp-sdk";
 
 const CONTRACT_ADDRESS = "0x68CB691bA8A2fcebAa88E5Be4Cd231c05CF7ACb2";
 const ABI = [
@@ -22,7 +22,7 @@ export default function GameOver() {
   const score = location.state?.score ?? 0;
 
   const { address, isConnected } = useAccount();
-  const { connect } = useConnect({ connector: new InjectedConnector() });
+  const { connect } = useConnect({ connector: injected() });
   const { writeContractAsync } = useWriteContract();
 
   const [sdk, setSdk] = useState(null);
@@ -34,9 +34,8 @@ export default function GameOver() {
   useEffect(() => {
     const init = async () => {
       try {
-        const s = new MiniAppSDK();
-        await s.ready();
-        setSdk(s);
+        await sdk.actions.ready();
+      setSdk(sdk);
         console.log("✅ Farcaster MiniApp SDK ready");
       } catch {
         console.log("⚠️ Farcaster SDK yüklenmedi, MetaMask fallback devrede");
@@ -47,11 +46,12 @@ export default function GameOver() {
 
   const handleTryAgain = () => navigate("/game");
 
-  const handleShare = () => {
-    const text = `🎮 Tetris Master'da ${score} puan yaptım! 🧱🔥`;
+    const handleShare = () => {
+    const text = `🎮 Tetris Master'da ${score} puan yaptım! 🧱🔥\n\nOyna 👉 https://farcaster.xyz/miniapps/N0owOm87nkzR/tetris-master`;
     const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
     window.open(shareUrl, "_blank");
   };
+
 
   const handleMint = async () => {
     try {
