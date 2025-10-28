@@ -6,6 +6,7 @@ import GameOver from "./components/GameOver";
 import "./App.css";
 import { sdk } from "@farcaster/miniapp-sdk";
 export default function App() {
+  const [ready, setReady] = useState(false);
     useEffect(() => {
     const init = async () => {
       try {
@@ -19,6 +20,13 @@ export default function App() {
     };
     init();
   }, []);
+   if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black text-white text-xl">
+        Yükleniyor...
+      </div>
+    );
+  }
   return (
     <Router>
    
