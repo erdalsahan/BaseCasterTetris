@@ -1,25 +1,89 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { base } from "viem/chains";
+import { useAccount, useConnect, useWriteContract } from "wagmi";
+import { InjectedConnector } from "wagmi/connectors/injected";
+import { MiniAppSDK } from "@farcaster/miniapp-sdk";
+
+const CONTRACT_ADDRESS = "0x68CB691bA8A2fcebAa88E5Be4Cd231c05CF7ACb2";
+const ABI = [
+  {
+    inputs: [{ internalType: "uint256", name: "_score", type: "uint256" }],
+    name: "mint",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+];
 
 export default function GameOver() {
   const navigate = useNavigate();
   const location = useLocation();
   const score = location.state?.score ?? 0;
 
-  const handleTryAgain = () => {
-    navigate("/game");
-  };
+  const { address, isConnected } = useAccount();
+  const { connect } = useConnect({ connector: new InjectedConnector() });
+  const { writeContractAsync } = useWriteContract();
+
+  const [sdk, setSdk] = useState(null);
+  const [minting, setMinting] = useState(false);
+  const [txHash, setTxHash] = useState(null);
+  const [error, setError] = useState("");
+
+  // 🧠 SDK ready kontrolü
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const s = new MiniAppSDK();
+        await s.ready();
+        setSdk(s);
+        console.log("✅ Farcaster MiniApp SDK ready");
+      } catch {
+        console.log("⚠️ Farcaster SDK yüklenmedi, MetaMask fallback devrede");
+      }
+    };
+    init();
+  }, []);
+
+  const handleTryAgain = () => navigate("/game");
 
   const handleShare = () => {
     const text = `🎮 Tetris Master'da ${score} puan yaptım! 🧱🔥`;
-    const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
-      text
-    )}`;
+    const shareUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`;
     window.open(shareUrl, "_blank");
   };
 
-  const handleMint = () => {
-    alert("🪙 Mint işlemi yakında aktif olacak!");
+  const handleMint = async () => {
+    try {
+      setError("");
+      setMinting(true);
+
+      // 🪙 1️⃣ Eğer Farcaster Wallet varsa, otomatik bağlan
+      if (sdk && sdk.wallet?.address) {
+        console.log("🔗 Farcaster Wallet:", sdk.wallet.address);
+      } else if (!isConnected) {
+        // 🪙 2️⃣ Farcaster yoksa MetaMask ile bağlan
+        await connect();
+      }
+
+      // 🧾 Mint işlemi
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: ABI,
+        functionName: "mint",
+        args: [score],
+        value: BigInt(10000000000000), // 0.00001 ETH = 10^13 wei
+        chainId: base.id,
+      });
+
+      console.log("✅ Mint gönderildi:", tx);
+      setTxHash(tx);
+    } catch (err) {
+      console.error("Mint hatası:", err);
+      setError("Mint işlemi başarısız oldu 😅");
+    } finally {
+      setMinting(false);
+    }
   };
 
   return (
@@ -48,24 +112,42 @@ export default function GameOver() {
       <div className="flex flex-col gap-5 w-full max-w-[300px]">
         <button
           onClick={handleTryAgain}
-          className="w-full py-4 rounded-full text-lg font-semibold text-white bg-gradient-to-r from-pink-500 to-purple-600 shadow-[0_0_25px_rgba(236,72,153,0.9)] hover:shadow-[0_0_40px_rgba(236,72,153,1)] hover:scale-105 active:scale-95 transition-all duration-300"
+          className="w-full py-4 rounded-full text-lg font-semibold text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition-all"
         >
           🔁 Try Again
         </button>
 
         <button
           onClick={handleShare}
-          className="w-full py-4 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 shadow-[0_0_25px_rgba(59,130,246,0.8)] hover:shadow-[0_0_40px_rgba(59,130,246,1)] hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+          className="w-full py-4 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 hover:scale-105 transition-all"
         >
           📤 Share Score
         </button>
 
         <button
           onClick={handleMint}
-          className="w-full py-4 rounded-full text-lg font-semibold bg-gradient-to-r from-amber-400 to-yellow-500 shadow-[0_0_25px_rgba(255,215,0,0.8)] hover:shadow-[0_0_40px_rgba(255,220,0,1)] hover:scale-105 transition-all duration-300"
+          disabled={minting}
+          className={`w-full py-4 rounded-full text-lg font-semibold bg-gradient-to-r from-amber-400 to-yellow-500 hover:scale-105 transition-all ${
+            minting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          🪙 Mint Score
+          {minting ? "⏳ Mintleniyor..." : "🪙 Mint Score"}
         </button>
+
+        {txHash && (
+          <p className="text-green-400 text-center text-sm mt-3">
+            ✅ Mint başarılı! <br />
+            <a
+              href={`https://basescan.org/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-cyan-300"
+            >
+              İşlemi Görüntüle
+            </a>
+          </p>
+        )}
+        {error && <p className="text-red-400 text-center text-sm mt-3">{error}</p>}
       </div>
     </div>
   );
