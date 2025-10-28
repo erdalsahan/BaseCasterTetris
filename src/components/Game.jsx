@@ -204,9 +204,9 @@ const handleLevelChange = (newLevel) => {
 return (
   <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white flex flex-col items-center py-6">
     {/* === Başlık === */}
-    <h1 className="text-4xl font-extrabold mb-6 text-cyan-400 drop-shadow-[0_0_12px_#22d3ee] flex items-center gap-2">
+    {/* <h1 className="text-4xl font-extrabold mb-6 text-cyan-400 drop-shadow-[0_0_12px_#22d3ee] flex items-center gap-2">
       🎮 <span>Tetris Master</span>
-    </h1>
+    </h1> */}
 
     {/* === Tahta === */}
     <div
