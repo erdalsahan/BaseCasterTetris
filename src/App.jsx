@@ -4,8 +4,21 @@ import FirstPage from "./components/FirstPage";
 import Game from "./components/Game";
 import GameOver from "./components/GameOver";
 import "./App.css";
-
+import { sdk } from "@farcaster/miniapp-sdk";
 export default function App() {
+    useEffect(() => {
+    const init = async () => {
+      try {
+        await sdk.actions.ready();
+        console.log("✅ Farcaster MiniApp SDK hazır!");
+        setReady(true);
+      } catch (err) {
+        console.warn("⚠️ SDK yüklenemedi:", err);
+        setReady(true);
+      }
+    };
+    init();
+  }, []);
   return (
     <Router>
    
