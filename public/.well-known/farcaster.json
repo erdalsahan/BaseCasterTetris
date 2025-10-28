@@ -1,0 +1,19 @@
+{
+    
+  "miniapp": {
+    "version": "1",
+    "name": "Tetris Master",
+    "description": "Break All Blocks",
+    "iconUrl": "https://base-caster-tetris.vercel.app/Logo.png",
+    "homeUrl": "https://base-caster-tetris.vercel.app/",
+    "canonicalDomain": "base-caster-tetris.vercel.app",
+    "requiredChains": ["eip155:8453"],
+    "tags": ["miniapp", "airdrop", "game", "mint"],
+    "requiredCapabilities": [
+      "actions.ready"
+    ]
+  },
+  "baseBuilder": {
+    "allowedAddresses": ["0xD684D39F1a486635D123d0a09C125970cFa33518"]
+  }
+}
