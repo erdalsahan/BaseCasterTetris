@@ -1,5 +1,9 @@
 {
-    
+    "accountAssociation": {
+    "header": "eyJmaWQiOjEzNDIyNzksInR5cGUiOiJhdXRoIiwia2V5IjoiMHhkNDAxNzAwZjU2YzFGOWY2Q0Y1RjMwNTAwNmQ5RmE1ODM5M2E3NzZhIn0",
+    "payload": "eyJkb21haW4iOiJiYXNlLWNhc3Rlci10ZXRyaXMudmVyY2VsLmFwcCJ9",
+    "signature": "PTV2jeBI8oyYyB9DzGWDY+h+2hlkT7VoxSCPxzgB7d1fDHk38LxAhNElFsP3P8uwCpNDnhfzvw+neWkPPjz6kRs="
+  },
   "miniapp": {
     "version": "1",
     "name": "Tetris Master",
