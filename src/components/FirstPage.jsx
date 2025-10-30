@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { base } from "viem/chains";
-import { useConnect, useAccount, useWriteContract } from "wagmi";
-import { InjectedConnector } from "wagmi/connectors/injected";
+import { useAccount, useConnect, useWriteContract } from "wagmi";
+import { injected } from "wagmi/connectors";
 import { sdk } from "@farcaster/miniapp-sdk"; // Farcaster Mini App SDK
 
 export default function FirstPage() {
   const navigate = useNavigate();
-  const { connect } = useConnect({ connector: new InjectedConnector() });
-  const { isConnected } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  
+   const { address, isConnected } = useAccount();
+    const { connect } = useConnect({ connector: injected() });
+    const { writeContractAsync } = useWriteContract();
 
   const [minting, setMinting] = useState(false);
   const [error, setError] = useState("");
